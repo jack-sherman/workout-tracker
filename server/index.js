@@ -24,10 +24,16 @@ app.get('/api/users', async(req, res)=> {
 app.post('/api/signup', async(req, res) => {
     const {username, password} = req.body;
     try{
-        const addedUser = await pool.query(
-            "INSERT INTO users (username, password) VALUES ($1, $2)", [username, password]
+        const checkUser = await pool.query(
+            "SELECT * FROM users WHERE (username = $1)", [username]
         );
-        console.log(addedUser)
+        if(checkUser.rowcount > 0){
+            const addedUser = await pool.query(
+                "INSERT INTO users (username, password) VALUES ($1, $2)", [username, password]
+            );
+        }else{
+            console.log("Failed to signup, user already exists.")
+        }
     } catch (err){
         console.log(err);
     }
